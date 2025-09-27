@@ -35,6 +35,22 @@ from espn_api.baseball import League
 league = League(league_id=222, year=2019)
 ```
 
+### Model Context Protocol (MCP) server
+
+An optional MCP server is available for users that want to integrate the
+package with MCP-compatible tooling (for example, AI assistants that speak the
+Model Context Protocol).  The server mirrors the python API and exposes tools
+that accept the same parameters such as `league_id`, `year`, `swid`, and
+`espn_s2`.
+
+```
+pip install espn-api mcp
+python -m espn_api.mcp_server
+```
+
+Each tool invocation should include the relevant credentials, keeping your ESPN
+cookies out of the long-lived server process.
+
 ### Run Tests
 ```
 python3 setup.py nosetests

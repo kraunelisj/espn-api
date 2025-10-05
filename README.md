@@ -49,7 +49,18 @@ python -m espn_api.mcp_server
 ```
 
 Each tool invocation should include the relevant credentials, keeping your ESPN
-cookies out of the long-lived server process.
+cookies out of the long-lived server process.  When the backend is deployed as a
+service you can also set `ESPN_MCP_SWID` and `ESPN_MCP_ESPN_S2` environment
+variables; the server uses them as defaults whenever a tool invocation omits the
+cookies.  Prefer storing the cookies on the backend (for example via App Runner
+environment variables or AWS Secrets Manager references).  Frontend build-time
+environment variables are bundled into the static site and are therefore visible
+to anyone who can load the app, so they are not suitable for protecting the
+private ESPN tokens.
+
+Need a managed deployment?  Follow the
+[AWS App Runner guide](docs/aws-app-runner-backend.md) to package the MCP server
+with OpenWebUI's MCPO proxy and host it as a backend service.
 
 ### Run Tests
 ```

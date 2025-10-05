@@ -22,6 +22,7 @@ credentials out of the transport layer.
 from __future__ import annotations
 
 import argparse
+import os
 from dataclasses import dataclass
 from functools import lru_cache
 import inspect
@@ -104,6 +105,23 @@ def _normalise_sport(sport: str) -> SportName:
     return aliases[sport_lower]  # type: ignore[return-value]
 
 
+_SWID_ENV_VARS = ("ESPN_MCP_SWID", "SWID")
+_ESPN_S2_ENV_VARS = ("ESPN_MCP_ESPN_S2", "ESPN_S2", "ESPN_S2_COOKIE")
+
+
+def _resolve_cookie(value: Optional[str], env_var_candidates: Tuple[str, ...]) -> Optional[str]:
+    """Return the provided value or fall back to the first populated env var."""
+
+    if value:
+        return value
+
+    for env_var in env_var_candidates:
+        candidate = os.environ.get(env_var)
+        if candidate:
+            return candidate
+    return None
+
+
 @lru_cache(maxsize=8)
 def _load_league_cached(key: LeagueKey) -> BaseLeague:
     """Load and cache a league instance for the provided parameters."""
@@ -125,7 +143,9 @@ def _load_league(
     espn_s2: Optional[str],
 ) -> BaseLeague:
     normalised = _normalise_sport(sport)
-    return _load_league_cached(LeagueKey(normalised, league_id, year, swid, espn_s2))
+    resolved_swid = _resolve_cookie(swid, _SWID_ENV_VARS)
+    resolved_espn_s2 = _resolve_cookie(espn_s2, _ESPN_S2_ENV_VARS)
+    return _load_league_cached(LeagueKey(normalised, league_id, year, resolved_swid, resolved_espn_s2))
 
 
 def _owner_to_dict(owner: Dict[str, Any]) -> Dict[str, Any]:
